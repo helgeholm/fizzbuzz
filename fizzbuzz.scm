@@ -5,12 +5,12 @@
 (define (lazy-pattern n t)
   (define (lazy-loop l)
     (cons (car l) (delay (lazy-loop (append (cdr l) (list (car l)))))))
-  (lazy-loop (append (make-list (1- n) #f) (list t))))
+  (lazy-loop (reverse (cons t (make-list n #f)))))
 
 (do ((l (lazip (list
-                 (lazy-pattern 15 'fizzbuzz)
-                 (lazy-pattern  3 'fizz)
-                 (lazy-pattern  5 'buzz)
+                 (lazy-pattern 14 'fizzbuzz)
+                 (lazy-pattern  2 'fizz)
+                 (lazy-pattern  4 'buzz)
                  (lazy-count 1)))
         (force (cdr l))))
   ((< 100 (cadddr (car l))))
