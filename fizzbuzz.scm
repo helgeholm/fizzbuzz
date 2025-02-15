@@ -5,11 +5,9 @@
 (define (lazy-pattern n t)
   (define (pad-f n v)
     (if (zero? n) `(,v) (cons #f (pad-f (1- n) v))))
-  (define (lazy-loop rest full)
-    (if (null? rest)
-      (lazy-loop full full)
-      (cons (car rest) (delay (lazy-loop (cdr rest) full)))))
-  (lazy-loop '() (pad-f (1- n) t)))
+  (define (lazy-loop l)
+    (cons (car l) (delay (lazy-loop (append (cdr l) (list (car l)))))))
+  (lazy-loop (pad-f (1- n) t)))
 
 (do ((l (lazip (list
                  (lazy-pattern 15 'fizzbuzz)
