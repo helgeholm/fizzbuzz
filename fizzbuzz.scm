@@ -3,11 +3,9 @@
 (define (lazip l)
   (cons (map car l) (delay (lazip (map force (map cdr l))))))
 (define (lazy-pattern n t)
-  (define (pad-f n v)
-    (if (zero? n) `(,v) (cons #f (pad-f (1- n) v))))
   (define (lazy-loop l)
     (cons (car l) (delay (lazy-loop (append (cdr l) (list (car l)))))))
-  (lazy-loop (pad-f (1- n) t)))
+  (lazy-loop (append (make-list (1- n) #f) (list t))))
 
 (do ((l (lazip (list
                  (lazy-pattern 15 'fizzbuzz)
