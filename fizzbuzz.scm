@@ -2,10 +2,6 @@
   (cons n (delay (lazy-count (1+ n)))))
 (define (lazip l)
   (cons (map car l) (delay (lazip (map force (map cdr l))))))
-(define (force-take n l)
-  (if (zero? n)
-    '()
-    (cons (car l) (force-take (1- n) (force (cdr l))))))
 (define (lazy-pattern n t)
   (define (pad-f n v)
     (if (zero? n) `(,v) (cons #f (pad-f (1- n) v))))
@@ -15,10 +11,12 @@
       (cons (car rest) (delay (lazy-loop (cdr rest) full)))))
   (lazy-loop '() (pad-f (1- n) t)))
 
-(for-each
-  (lambda (x) (display (car (delete #f x))) (newline))
-  (force-take 100 (lazip (list
-                           (lazy-pattern 15 'fizzbuzz)
-                           (lazy-pattern  3 'fizz)
-                           (lazy-pattern  5 'buzz)
-                           (lazy-count 1)))))
+(do ((l (lazip (list
+                 (lazy-pattern 15 'fizzbuzz)
+                 (lazy-pattern  3 'fizz)
+                 (lazy-pattern  5 'buzz)
+                 (lazy-count 1)))
+        (force (cdr l))))
+  ((< 100 (cadddr (car l))))
+  (display (car (delete #f (car l))))
+  (newline))
