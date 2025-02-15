@@ -1,0 +1,27 @@
+(define (lazy-count n)
+  (delay (cons n (lazy-count (+ 1 n)))))
+(define (pad-f n v)
+  (if (zero? n) `(,v) (cons #f (pad-f (- n 1) v))))
+(define (lazip l)
+  (delay
+    (let ((fl (map force l)))
+      (cons (map car fl) (lazip (map cdr fl))))))
+(define (force-take n l)
+    (if (zero? n)
+      '()
+      (let ((fl (force l)))
+        (cons (car fl) (force-take (- n 1) (cdr fl))))))
+(define (lazy-pattern n t)
+  (define (lazy-loop rest full)
+    (if (null? rest)
+      (lazy-loop full full)
+      (delay (cons (car rest) (lazy-loop (cdr rest) full)))))
+  (lazy-loop '() (pad-f (- n 1) t)))
+
+(for-each
+  (lambda (x) (display (car (delete #f x))) (newline))
+  (force-take 100 (lazip (list
+                           (lazy-pattern 15 'fizzbuzz)
+                           (lazy-pattern  3 'fizz)
+                           (lazy-pattern  5 'buzz)
+                           (lazy-count 1)))))
