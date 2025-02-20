@@ -2,7 +2,7 @@
 (define (lazy-count n)
   `(,n . ,(l8r (lazy-count (1+ n)))))
 (define (lazip l)
-  `(,(map car l) . ,(l8r (lazip (map (lambda (o) (o)) (map cdr l))))))
+  `(,(map car l) . ,(l8r (lazip (map (lambda (m) ((cdr m))) l)))))
 (define (lazy-pulse n t)
   (define (lazy-loop l)
     `(,(car l) . ,(l8r (lazy-loop (append (cdr l) `(,(car l)))))))
