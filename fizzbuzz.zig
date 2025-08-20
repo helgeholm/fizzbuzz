@@ -1,6 +1,6 @@
 const STDOUT = std.io.getStdOut().writer();
 const JUMPS: []const usize = &.{ 16, 32, 0, 0, 0, 0 };
-var ram: [67]u8 = undefined;
+var ram: [66]u8 = undefined;
 
 const Printer = struct {
     text: ?[]const u8 = "._.",
@@ -25,7 +25,7 @@ pub fn main() !void {
             ram[JUMPS[2 * @mod(i, 3)]..][JUMPS[1 + @mod(i, 5)]..][0..16],
         );
         var fbb = fba;
-        const number = try std.fmt.allocPrint(fbb.allocator(), "{d}", .{i});
+        const number = std.fmt.allocPrint(fbb.allocator(), "{d}", .{i}) catch "o_o";
         try printer.writeTextOrNumber(number);
         printer.text = null;
     }
