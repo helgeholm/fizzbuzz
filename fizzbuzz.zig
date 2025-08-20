@@ -1,15 +1,34 @@
-const std = @import("std");
+const STDOUT = std.io.getStdOut().writer();
+const JUMPS: []const usize = &.{ 16, 32, 0, 0, 0, 0 };
+var ram: [67]u8 = undefined;
 
-inline fn fb(n: comptime_int) []const u8 {
-    if (n > 100) return "";
-    return switch (n % 15) {
-        3, 6, 9, 12 => "fizz\n",
-        5, 10 => "buzz\n",
-        0 => "fizzbuzz\n",
-        else => std.fmt.comptimePrint("{d}\n", .{n}),
-    } ++ fb(n + 1);
-}
+const Printer = struct {
+    text: ?[]const u8 = "._.",
+    fn writeTextOrNumber(this: Printer, number: []const u8) !void {
+        try STDOUT.writeAll(this.text orelse number);
+        return STDOUT.writeAll("\n");
+    }
+};
 
 pub fn main() !void {
-    try std.io.getStdOut().writer().writeAll(fb(1));
+    var fba = std.heap.FixedBufferAllocator.init(&ram);
+    const alloc = fba.allocator();
+    const printer = try alloc.create(Printer);
+    @memset(&ram, 0);
+    (try alloc.create(Printer)).text = "fizz";
+    (try alloc.create(Printer)).text = "buzz";
+    (try alloc.create(Printer)).text = "fizzbuzz";
+    for (1..101) |i| {
+        std.mem.copyForwards(
+            u8,
+            &ram,
+            ram[JUMPS[2 * @mod(i, 3)]..][JUMPS[1 + @mod(i, 5)]..][0..16],
+        );
+        var fbb = fba;
+        const number = try std.fmt.allocPrint(fbb.allocator(), "{d}", .{i});
+        try printer.writeTextOrNumber(number);
+        printer.text = null;
+    }
 }
+
+const std = @import("std");
